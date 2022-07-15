@@ -35,7 +35,6 @@ if __name__ == "__main__":
             save_last=True
         ),
         gpus=[0] if torch.cuda.is_available() else [],
-        auto_lr_find=True,
         log_every_n_steps=3
     )
     trainer.fit(pl_module, train_loader, valid_loader)

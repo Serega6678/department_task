@@ -30,8 +30,8 @@ class AuthorClassifier(nn.Module):
     def __init__(
         self,
         emb_dim: int = 312,
-        extractor_hidden: int = 64,
-        classifier_hidden: int = 32,
+        extractor_hidden: int = 256,
+        classifier_hidden: int = 128,
         extractor_num_layers: int = 4
     ) -> None:
         super().__init__()
@@ -40,12 +40,13 @@ class AuthorClassifier(nn.Module):
             hidden_size=extractor_hidden,
             num_layers=extractor_num_layers,
             batch_first=True,
-            bidirectional=True
+            bidirectional=False,
+            bias=False
         )
         self.classifier = nn.Sequential(
-            nn.Linear(extractor_hidden * 2, classifier_hidden),
+            nn.Linear(extractor_hidden, classifier_hidden, bias=False),
             nn.ReLU(),
-            nn.Linear(classifier_hidden, 1)
+            nn.Linear(classifier_hidden, 1, bias=False)
         )
 
     def forward(self, x) -> torch.Tensor:

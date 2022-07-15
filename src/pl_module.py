@@ -19,9 +19,7 @@ class LightningModule(pl.LightningModule):
         text_embeddings = batch["embeddings"]
         labels = batch["labels"]
         logits = self.forward(text_embeddings)
-        logits = logits[labels != -1]
-        labels = labels[labels != -1]
-        loss = F.binary_cross_entropy_with_logits(logits, labels.float())
+        loss = self._calculate_loss(labels, logits)
         self.log("train_loss", loss, on_step=True, on_epoch=True)
         return loss
 
@@ -29,9 +27,7 @@ class LightningModule(pl.LightningModule):
         text_embeddings = batch["embeddings"]
         labels = batch["labels"]
         logits = self.forward(text_embeddings)
-        logits = logits[labels != -1]
-        labels = labels[labels != -1]
-        loss = F.binary_cross_entropy_with_logits(logits, labels.float())
+        loss = self._calculate_loss(labels, logits)
         self.log("val_loss", loss, on_step=True, on_epoch=True)
         return loss
 
@@ -45,12 +41,20 @@ class LightningModule(pl.LightningModule):
                 "scheduler": torch.optim.lr_scheduler.ReduceLROnPlateau(
                     optimizer,
                     factor=0.1,
-                    patience=3,
+                    patience=5,
                     verbose=True,
-                    cooldown=5,
+                    cooldown=7,
                 ),
                 "frequency": 1,
                 "monitor": "val_loss",
                 "interval": "epoch"
             },
         }
+
+    @staticmethod
+    def _calculate_loss(labels, logits):
+        weights = torch.ones_like(labels, dtype=torch.float)
+        weights[labels == -1] = 0
+        weights[labels == 1] = 17.15
+        loss = F.binary_cross_entropy_with_logits(logits, labels.float(), weight=weights)
+        return loss

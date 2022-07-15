@@ -23,6 +23,17 @@ if __name__ == "__main__":
     valid_data_name = sys.argv[3] + ".json"
     valid_data_path = json_path.parent / valid_data_name
 
+    if len(sys.argv) >= 5:
+        test_data_name = sys.argv[4] + ".json"
+        test_data_path = json_path.parent / test_data_name
+
+        val_data_len = math.ceil(len(val_data) * 0.66)
+        test_data = val_data[val_data_len:]
+        val_data = val_data[:val_data_len]
+
+        with test_data_path.open("w") as f:
+            json.dump(test_data, f, ensure_ascii=False, indent=2)
+
     with train_data_path.open("w") as f:
         json.dump(train_data, f, ensure_ascii=False, indent=2)
 
